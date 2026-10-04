@@ -1,55 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
     {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exam result | {{ course.name }}</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'onlinecourse/course.css' %}">
 </head>
 <body>
-
- <nav class="navbar navbar-light bg-light">
-    <div class="container-fluid">
-        <div class="navbar-header">
-              <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
+<nav class="navbar navbar-expand navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Online Course</a>
+        <div class="ml-auto text-white">
+            <span class="mr-3">{{ user.first_name }} ({{ user.username }})</span>
+            <a class="btn btn-light btn-sm" href="{% url 'onlinecourse:logout' %}">Logout</a>
         </div>
-        <ul class="nav navbar-nav navbar-right">
-            {% if user.is_authenticated %}
-            <li>
-                <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
-                <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
-            </li>
-            {% else %}
-            <li>
-                <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Username" name="username" >
-                        <input type="password" class="form-control" placeholder="Username" name="psw" >
-                        <button class="btn btn-primary" type="submit">Login</button>
-                        <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
-                    </div>
-                </form>
-            </li>
-            {% endif %}
-        </ul>
     </div>
 </nav>
 
-<div class="container-fluid">
-    {% if grade > 80 %}
-    <div class="alert alert-success">
-       <!--HINT Display passed info -->
-    </div>
-        {% else %}
-        <div class="alert alert-danger">
-            <!--HINT Display failed info -->
-        </div>
-        <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-        {% endif %}
-        <div class="card-columns-vertical mt-1">
-        <h5 class="">Exam results</h5>
-            <!--HINT Display exam results-->
-        </div>
-    </div>
+<main class="container py-5">
+    {% if grade >= 80 %}
+        <section class="result-hero passed text-center shadow-sm">
+            <div class="display-4 mb-3">🎉</div>
+            <h1>Congratulations! You passed the exam.</h1>
+            <p class="lead mb-2">You demonstrated a strong understanding of {{ course.name }}.</p>
+            <div class="score-pill">Score: {{ grade }}%</div>
+            <p class="mt-3 mb-0">{{ earned_points }} of {{ total_points }} points earned</p>
+        </section>
+    {% else %}
+        <section class="result-hero needs-work text-center shadow-sm">
+            <h1>Keep learning and try again.</h1>
+            <div class="score-pill">Score: {{ grade }}%</div>
+            <p class="mt-3">{{ earned_points }} of {{ total_points }} points earned</p>
+            <a class="btn btn-light" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
+        </section>
+    {% endif %}
+
+    <section class="mt-5" aria-labelledby="results-heading">
+        <h2 id="results-heading" class="h3 mb-3">Exam results</h2>
+        {% for result in question_results %}
+            <article class="card shadow-sm mb-3 {% if result.is_correct %}border-success{% else %}border-danger{% endif %}">
+                <div class="card-header d-flex justify-content-between">
+                    <strong>Question {{ forloop.counter }}: {{ result.question.question_text }}</strong>
+                    {% if result.is_correct %}
+                        <span class="badge badge-success p-2">Correct · +{{ result.question.grade }}</span>
+                    {% else %}
+                        <span class="badge badge-danger p-2">Incorrect · +0</span>
+                    {% endif %}
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-6">
+                        <h3 class="h6 text-uppercase text-muted">Your selection</h3>
+                        <ul class="mb-0">
+                            {% for choice in result.selected_choices %}
+                                <li>{{ choice.choice_text }}</li>
+                            {% empty %}
+                                <li>No answer selected</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h6 text-uppercase text-muted">Correct answer</h3>
+                        <ul class="mb-0">
+                            {% for choice in result.correct_choices %}
+                                <li>{{ choice.choice_text }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+</main>
 </body>
 </html>

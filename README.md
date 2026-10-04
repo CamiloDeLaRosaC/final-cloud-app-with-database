@@ -1,5 +1,24 @@
 
-**General Notes**
+# Online Course Assessment — Django Final Project
+
+This repository implements the IBM final project **Add a New Assessment Feature
+to an Online Course Application**. It adds question, choice, and submission
+models; nested administration; an interactive exam; secure submission views;
+automatic grading; and a detailed results page.
+
+## Run locally
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+Open <http://127.0.0.1:8000/onlinecourse/>.
+
+## General Notes
 
 An `onlinecourse` app has already been provided in this repo upon which you will be adding a new assesement feature.
 
